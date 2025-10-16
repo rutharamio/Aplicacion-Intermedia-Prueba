@@ -26,45 +26,44 @@ public class CustomAdapter extends ArrayAdapter<ContactModel> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        // Reutiliza o infla la vista del item
+        // Inflar solo si es necesario
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.item_user, parent, false);
         }
 
-        // Obtiene el contacto actual
+        // Obtener el contacto actual
         ContactModel contact = getItem(position);
 
-        // Referencias a los TextViews
+        // Referencias a los elementos del layout
+        LinearLayout layout = convertView.findViewById(R.id.linear);
         TextView tvName = convertView.findViewById(R.id.tvName);
         TextView tvPhone = convertView.findViewById(R.id.tvPhone);
-        LinearLayout layout = convertView.findViewById(R.id.linear);
 
-        // Carga los datos
+        // Cargar datos
         tvName.setText(contact.getName());
         tvPhone.setText(contact.getPhoneNo());
 
-        // 🟣 Acción al mantener presionado el contacto
+        // 🟣 Acción al mantener presionado (eliminar contacto)
         layout.setOnLongClickListener(view -> {
             new AlertDialog.Builder(context)
                     .setTitle("Eliminar contacto")
                     .setMessage("¿Deseas eliminar a " + contact.getName() + "?")
                     .setPositiveButton("Sí", (dialog, which) -> {
                         DbHelper db = new DbHelper(context);
-                        db.deleteContact(contact); // borra en base de datos
-                        contacts.remove(contact); // borra del adaptador
-                        notifyDataSetChanged(); // actualiza la lista
+                        db.deleteContact(contact);
+                        contacts.remove(contact);
+                        notifyDataSetChanged();
                         Toast.makeText(context, "Contacto eliminado", Toast.LENGTH_SHORT).show();
                     })
-                    .setNegativeButton("Cancelar", null)
+                    .setNegativeButton("No", null)
                     .show();
-            return true; // importante: devuelve true para indicar que el evento fue manejado
+            return true;
         });
 
         return convertView;
     }
 
-    // Refresca la lista cuando se agregan nuevos contactos
+    // Refresca la lista cuando hay cambios
     public void refresh(List<ContactModel> updatedContacts) {
         contacts.clear();
         contacts.addAll(updatedContacts);
